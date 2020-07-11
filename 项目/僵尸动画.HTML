@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .walk {
+            width: 200px;
+            height: 312px;
+            /* background-color: bisque; */
+            background-image: url('./walkingdead.png');
+            background-position: 200px;
+            animation-name: wa;
+            animation-duration: 4s;
+            animation-iteration-count: infinite;
+            animation-timing-function: steps(10, start);
+            margin: 0 auto;
+
+        }
+
+        @keyframes wa {
+            from {
+                background-position-x: 0px;
+            }
+
+            to {
+                background-position-x: -2000px;
+            }
+        }
+
+        .gilf {
+            width: 180px;
+            height: 300px;
+            /* background-color:blueviolet; */
+            background-position: 180px;
+            animation-name: gilf;
+            animation-duration: 4s;
+            animation-iteration-count: infinite;
+            background-image: url('./sprites.png');
+            animation-timing-function: steps(7, start);
+            margin: 0 auto;
+        }
+
+        @keyframes gilf {
+            from {
+                background-position-x: 0px;
+            }
+
+            to {
+                background-position-x: -1260px;
+            }
+        }
+
+        .sprites-IORI {
+            width: 76.5px;
+            height: 81px;
+            background-position: 76.5px;
+            animation: sprites-IORI 5s infinite;
+            background-image: url('./sprites-IORI.jpg');
+            animation-timing-function: steps(26, start);
+            margin: 0 auto;
+             transform: scale(4);
+        }
+        @keyframes sprites-IORI {
+            from {
+                background-position-x: 0px;
+            }
+            to {
+                background-position-x: -1912.5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="walk"></div>
+    <div class="gilf">
+    </div>
+    <div class="sprites-IORI">
+    </div>
+</body>
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立方体</title>
+    <style>
+        html{
+            height: 100%;
+        }
+        body {
+            height: 100%;
+            background:linear-gradient(-90deg,rgba(255,0,0,0), #9198e5);
+            transform-style:preserve-3d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1500px;
+            perspective-origin: 50% 50%;
+        }
+        .state{
+            width: 300px;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            /* background-color: ivory; */
+            transition: all 0.5s;
+            background-size: cover;   
+                   /* transform: rotateX(135deg) rotateY(135deg) rotateZ(0);   */
+  
+        }
+        .slide{
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .left{
+            background-color:lightskyblue;
+            transform: rotateY(-90deg) translateZ(150px);
+            background-image: url('./1.jpg');
+        }
+         .right{
+            background-color: lightgreen;
+            transform: rotateY(90deg) translateZ(150px);
+            background-image: url('./2.jpg');
+        }
+        .top{
+            background-color: lightpink;
+            transform: rotateX(-90deg) translateZ(-150px);
+              background-image: url('./3.jpg');
+          
+        }
+          .bottom{
+            /* background-color: lightsalmon; */
+            transform: rotateX(90deg) translateZ(-150px);
+             background-image: url('./4.jpg');
+            
+          
+        }
+        .front{
+            /* background-color: lightyellow; */
+            transform: translateZ(150px);
+            z-index: 9;
+            background-image: url('./4.jpg');
+            /* background-image: ; */
+        }
+        .back{
+            background-color:lightsteelblue;
+            transform:rotateY(180deg) translateZ(150px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="state">
+        <div class="slide left"></div>
+        <div class="slide right"></div>
+        <div class="slide top"></div>
+        <div class="slide bottom"></div>
+        <div class="slide front"></div>
+        <div class="slide back"></div>
+    </div>
+</body>
+
+<script>
+    document.body.onmousemove=function (event) {
+        console.log(event.clientX, event.clientY);
+        document.body.style.perspectiveOrigin= event.clientX+ 'px '+ event.clientY+'px'
+    };
+</script>
+</html>
