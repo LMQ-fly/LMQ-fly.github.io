@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .completed {
+            color: #777;
+            text-decoration: line-through;
+        }
+
+        .move-enter {
+            transform: translateX(100px);
+        }
+
+        .move-enter-active,
+        .move-leave-active {
+            transition: all .5s linear;
+        }
+
+        .move-enter-to,
+        .move-leave {
+            transform: translateX(0);
+        }
+
+        .move-leave-to {
+            transform: translateX(-100px);
+        }
+
+        .filter-btn {
+            margin: 0 5px;
+            display: inline-block;
+            padding: 2px 5px;
+            font-size: 14px;
+            line-height: 18px;
+        }
+
+        .filter-btn.active {
+            font-weight: 700;
+            color: rgb(0, 160, 220);
+            border-bottom: 1px solid rgb(0, 160, 220);
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <div id="app">
+        <div>
+            <todo-header @call-add-todo="addTodo"></todo-header>
+            
+            <todo-list 
+            :todos-list="todosList" 
+            @call-remove-todo="removeTodo"
+            @call-toggle-todo-completed="toggleTodo"
+            @call-change-todo-text="rewriting"
+            ></todo-list>
+
+            <todo-filter :filter="filter" @call-set-filter="setFilter"></todo-filter>
+        </div>
+    </div>
+    <script>
+        const ALL = 0
+        const ACTVE = 1
+        const COMPLETED = 2
+
+        new Vue({
+            el: '#app',
+            data: {
+                todos: [
+                    {
+                        id: 1,
+                        text: '学习vue',
+                        completed: false,
+                    },
+                    {
+                        id: 2,
+                        text: '学习webpack',
+                        completed: true,
+                    },
+                    {
+                        id: 3,
+                        text: '学习ES6',
+                        completed: true,
+                    }
+                ],
+                filter: ALL
+            },
+            methods: {
+                addTodo(text) {
+                    if (!text) {
+                        return
+                    }
+                    this.todos.push({
+                        id: new Date().getTime(),
+                        text,
+                        completed: false
+                    })
+                },
+                removeTodo(id) {
+                    this.todos = this.todos.filter(t => t.id !== id)
+                },
+                /*
+                 切换todo 已完成未完成状态的方法
+                 this.$emit('call-toggle-todo-completed',{
+                                completed: evt.target.checked, 更新后的completed值
+                                id  // 需要更新todo的id
+                            })
+                 子组件自定义事件名 'call-toggle-todo-completed',
+                 传递对象作为参数, 参数中包含 completed,id 两个属性        
+                */
+                toggleTodo({completed, id}) {
+                    // 遍历所有的todo
+                    this.todos.forEach(todo => {
+                        // 找到与子元素发送过来的id相等的todo
+                        if(todo.id === id) {
+                            // 修改对应todo的completed属性值为子元素发送过来的completed值
+                            todo.completed = completed
+                        }
+                        
+                    })
+                },
+                /*
+                 修改todo的text
+                 this.$emit('call-change-todo-text', {
+                                text: evt.target.value, 修改后todo的text值
+                                id // 需要更新todo的id
+                            })
+                */
+                rewriting({id, text}) {
+                  // 遍历所有的todo
+                   this.todos.forEach(t => {
+                        // 找到与子元素发送过来的id相等的todo
+                       if(t.id === id) {
+                            // 修改对应todo的text属性值为子元素发送过来的text值
+                           t.text = text
+                       }
+                   })
+                },
+                setFilter(filter) {
+                    this.filter = filter
+                }
+            },
+            computed: {
+                todosList() {
+                    switch (this.filter) {
+                        case ACTVE:
+                            return this.todos.filter(t => !t.completed)
+                        case COMPLETED:
+                            return this.todos.filter(t => t.completed)
+                        default:
+                            return this.todos
+                    }
+                }
+            },
+            components: {
+                'todo-header': {
+                    data() {
+                        return {
+                            text: ''
+                        }
+                    },
+                    template: `
+                    <div>
+                        <input type="text" v-model.trim="text">
+                        <button @click="addTodo">add todo</button>
+                    </div>
+                    `,
+                    methods: {
+                        addTodo() {
+                            this.$emit('call-add-todo', this.text)
+                            this.text = ''
+                        }
+                    }
+                },
+                'todo-filter': {
+                    props: ['filter'],
+                    template: `
+                        <div>
+                            <span class="filter-btn" @click="$emit('call-set-filter',0)"  :class="{active:filter === 0}">All</span>
+                            <span class="filter-btn" @click="$emit('call-set-filter',1)"  :class="{active:filter === 1}">Active</span>
+                            <span class="filter-btn" @click="$emit('call-set-filter',2)"  :class="{active:filter === 2}">Completed</span>
+                        </div>
+                    `
+                },
+                'todo-list': {
+                    // list 实现过滤效果,list要有两个数据 todos filter 再通过计算属性获取 todosList
+                    // 这里推荐直接将计算属性todosList 作为props传递给子组件
+                    props: ['todos-list'],
+                    data() {
+                        return {
+                            showId: null
+                        }
+                    },
+                    template: `
+                        <transition-group tag="ul" name="move">
+                            <li v-for="(todo,index) in todosList" :key="todo.id" :class="{completed: todo.completed}">
+                                <!-- 
+                                这里不能使用 v-model, 因为todo是todosList内部的值,
+                                todosList是父组件通过props传递进来的,todosList值不可以直接修改
+                                v-model会直接修改绑定的值(不符合单项数据流)
+                                -->
+                                <input type="checkbox" :checked="todo.completed" @change="toggleInput($event,todo.id)">
+                                <span v-show="showId !== todo.id" @dblclick="setShowId(todo.id, index)">{{todo.text}}</span>
+                                <!--
+                                 这里的输入框也不能使用v-model原因与上面相同
+                                 :value="todo.text" 将text显示在表单中,但表单的修改不会直接改变todo.text
+                                 showId 用来条件渲染对应input元素的data,这个数据除了子组件自身需要以外,没有其他组件需要,showId应该属于子组件自身
+                                 注意子组件的refs只属于子组件
+                                -->
+                                <input ref="myInput" :value="todo.text" v-show="showId === todo.id" @blur="blurHandel($event,todo.id)" >
+                                <button @click="$emit('call-remove-todo', todo.id)">删除</button>
+                            </li>
+                        </transition-group>
+                    `,
+                    methods: {
+                        toggleInput(evt,id) {
+                            console.log(evt.target.checked, id)
+                            this.$emit('call-toggle-todo-completed',{
+                                completed: evt.target.checked,
+                                id
+                            })
+                        },
+                        // 双击文本显示input标签
+                        setShowId(id, index) {
+                            this.showId = id
+                            //等待下一帧页面渲染
+                            this.$nextTick(() => {
+                                this.$refs.myInput[index].focus()
+                            })
+
+                        },
+                        blurHandel(evt,id) {
+                            // input光标失去焦点后不但要隐藏input, 还要反向传值修改父组件todo中的text
+                            this.showId = null
+                            this.$emit('call-change-todo-text', {
+                                text: evt.target.value,
+                                id
+                            })
+                        }
+                    }
+                }
+            }
+        })
+
+    </script>
+</body>
+
+</html>

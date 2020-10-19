@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .active {
+        color: rgb(240,20,20);
+        font-weight: 700;
+        font-size: 20;
+    }
+</style>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <div id="app">
+        <audio class="audio" src="./药水歌.mp3" controls @timeupdate="playing"></audio>
+        <ul>
+            <li v-for="(lrcItem,index) in lyricArr" 
+            @dblclick="selectMusicProgress(lrcItem.time)"
+            :class="{active: index === currentIndex}" 
+            :key="index">
+               {{lrcItem.time}} / {{lrcItem.lyc}}
+            </li>
+        </ul>
+        <h2>{{currentIndex}}</h2>
+    </div>
+
+    <script>
+        const lyric =
+            "[00:00.000] 作曲 : JWORD\n[00:01.000] 作词 : JWORD\n[00:04.224]编曲：JWORD\n[00:13.223]我出门总是带着五瓶药水\n[00:15.692]手中的卡牌不停切换到位\n[00:18.641]别跟我撒娇也别叫我宝贝\n[00:21.442]就算我一个人也不会后退\n[00:24.274]我出门总是带着五瓶药水\n[00:27.006]手中的卡牌不停切换到位\n[00:30.007]别跟我撒娇也别叫我宝贝\n[00:32.773]就算我一个人也不会后退\n[00:35.724]我以前根本没想过\n[00:37.489]我也能开讲座\n[00:38.806]在直播间里顺着找回我的小角落\n[00:41.641]有人不喜欢我但你也得到了快乐\n[00:44.524]那背负骂名的事就让我一个人受吧\n[00:47.405]你只知道我爱假哭\n[00:49.407]但你不知道我也有自己的难处\n[00:52.790]就在你喷完了觉得很舒服\n[00:55.575]直播间里的玛莎拉蒂\n[00:57.324]去参加下个party(派对)\n[00:58.775]如果你们真的讨厌我\n[01:00.591]就努力比我过得更好\n[01:02.409]要趁早 抓住那些机会\n[01:04.456]让你吃得更饱\n[01:05.608]勇敢地向前跑不管那些质疑\n[01:08.225]不过都是一道道的试题而已\n[01:10.225]要做就做他们不敢做的事\n[01:12.758]当勇士有了心它变成不可摧的志\n[01:15.490]十块的电子表它时间也一样地转\n[01:18.574]能忍受别人不能忍的才能看到岸\n[01:21.241]我出门总是带着五瓶药水\n[01:24.192]手中的卡牌不停切换到位\n[01:27.274]别跟我撒娇也别叫我宝贝\n[01:29.992]就算我一个人也不会后退\n[01:32.891]我出门总是带着五瓶药水\n[01:35.680]手中的卡牌不停切换到位\n[01:38.608]别跟我撒娇也别叫我宝贝\n[01:41.390]就算我一个人也不会后退\n[01:44.193]音乐总监：陈令韬\n[01:45.193]混音：时俊峰/小武\n"
+
+        new Vue({
+            el: '#app',
+            data: {
+
+                lyric, // 歌词原数据
+                currentIndex: 0 // 高亮歌词的下标
+
+            },
+            methods: {
+                playing(e) {
+                    // console.log(this.lyricArr)
+                    console.log(e.target.currentTime, 'playing')
+                    // 根据event事件对象获取 audio元素, 在通过currentTime属性获取audio的播放时间
+                    let now = e.target.currentTime
+                    // 遍历所有的歌词与当前播放时间进行一一比较,
+                    // 当前媒体播放时间大于等于本条歌词播放时间, 并且小于下一条歌词的播放时间
+                    // 本条歌词就是当前播放歌词
+                    for (let i = 0; i < this.lyricArr.length; i++) {
+                        // 如果已经遍历最后,直接让高亮歌词为最后一句
+                        if(i === this.lyricArr.length - 1) {
+                            this.currentIndex = i
+                            break
+                        }
+                        // 获取当前遍历项歌词的播放时间
+                        let lrcTime = this.lyricArr[i].time
+                        // 获取下一条歌词的播放时间
+                        let nextLrcTime = this.lyricArr[i + 1].time
+                        // 当前媒体播放时间大于等于本条歌词播放时间, 并且小于下一条歌词的播放时间
+                        if(now >= lrcTime && now < nextLrcTime) {
+                            this.currentIndex = i
+                            break
+                        }
+                    }
+                },
+                selectMusicProgress(time) {
+                    let audio = document.getElementsByClassName('audio')[0]
+                    audio.currentTime = time
+                }
+            },
+            computed: {
+                /*
+                lyricArr() {
+                    let arr = this.lyric.split(/\n/)
+
+                    console.log(arr.map(l => {
+
+                        let lrc = l.split(']')
+                    
+                        let times = lrc[0].substr(1).split(':')
+
+                        return {
+                            time: parseInt(times) * 60 + parseFloat(times[1]),
+                            text: lrc[1]
+                        }
+
+                    }))
+
+                    return arr
+                }*/
+                lyricArr() {
+                    let arr = this.lyric.split(/\n/)
+                    // 正则组匹配
+                    return arr.map(l => {
+                        // "[01:00.125] 歌词"
+                        // 正则小括号组匹配,如果正则与字符串匹配成功
+                        // RegExp就可以通过$n属性,获取正则表达式中对应组匹配的文本
+                        /\[(\d+):(\d+\.\d+)\](.+)/.test(l)
+                        // console.log(RegExp.$1, RegExp.$2, RegExp.$3)
+                        return {
+                            time: parseInt(RegExp.$1) * 60 + parseFloat(RegExp.$2),
+                            lyc: RegExp.$3
+                        }
+
+                    })
+
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
